@@ -356,3 +356,207 @@ class FormHandlers {
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            
+            if (AuthManager.login(email, password)) {
+                Utils.showMessage('loginSuccess', 'Login successful! Redirecting...', 'success');
+                Utils.hideMessage('loginError');
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            } else {
+                Utils.showMessage('loginError', 'Invalid email or password. Please try again.', 'error');
+                Utils.hideMessage('loginSuccess');
+            }
+        });
+    }
+
+    static handleAddReview(formId, placeId = null) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!AuthManager.isLoggedIn()) {
+                alert('Please login to add a review.');
+                return;
+            }
+
+            const selectedPlaceId = placeId || document.getElementById('reviewPlace')?.value;
+            const rating = document.getElementById(formId.includes('inline') ? 'inlineRating' : 'reviewRating').value;
+            const comment = document.getElementById(formId.includes('inline') ? 'inlineComment' : 'reviewComment').value;
+            
+            if (!selectedPlaceId || !rating || !comment) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Add the review
+            ReviewManager.addReview(selectedPlaceId, rating, comment);
+            
+            // Show success message
+            if (formId.includes('inline')) {
+                alert('Review added successfully!');
+                // Reload reviews if we're on place details page
+                ReviewManager.loadReviews(selectedPlaceId, 'reviewsContainer');
+                // Hide the form
+                const inlineForm = document.getElementById('addReviewInline');
+                if (inlineForm) inlineForm.style.display = 'none';
+            } else {
+                Utils.showMessage('reviewSuccess', 'Review added successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+            
+            // Reset form
+            form.reset();
+        });
+    }
+
+    static handleLogout() {
+        const logoutBtns = document.querySelectorAll('.logout-button');
+        logoutBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                AuthManager.logout();
+            });
+        });
+    }
+}
+
+// Page-specific initialization functions
+const PageInit = {
+    // Initialize Index Page
+    index: function() {
+        AuthManager.updateAuthState();
+        PlaceManager.loadPlacesGrid('placesGrid');
+        FormHandlers.handleLogout();
+    },
+
+    // Initialize Login Page
+    login: function() {
+        AuthManager.updateAuthState();
+        
+        // Redirect if already logged in
+        if (AuthManager.isLoggedIn()) {
+            window.location.href = 'index.html';
+            return;
+        }
+        
+        FormHandlers.handleLogin('loginForm');
+    },
+
+    // Initialize Place Details Page
+    place: function() {
+        AuthManager.updateAuthState();
+        FormHandlers.handleLogout();
+        
+        const placeId = Utils.getUrlParameter('id') || '1';
+        
+        // Load place details
+        PlaceManager.loadPlaceDetails(placeId, 'placeDetailsContent');
+        
+        // Load reviews
+        ReviewManager.loadReviews(placeId, 'reviewsContainer');
+        
+        // Handle inline review form
+        FormHandlers.handleAddReview('inlineReviewForm', placeId);
+        
+        // Handle "Add Review" button click
+        const addReviewBtn = document.querySelector('.add-review-btn');
+        if (addReviewBtn) {
+            addReviewBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const inlineForm = document.getElementById('addReviewInline');
+                if (inlineForm) {
+                    inlineForm.style.display = inlineForm.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+        }
+    },
+
+    // Initialize Add Review Page
+    addReview: function() {
+        AuthManager.updateAuthState();
+        FormHandlers.handleLogout();
+        
+        // Check authentication
+        if (!AuthManager.isLoggedIn()) {
+            document.getElementById('authRequired').style.display = 'block';
+            document.getElementById('reviewContent').style.display = 'none';
+            return;
+        }
+        
+        // Populate place selection
+        Utils.populatePlaceSelect('reviewPlace');
+        
+        // Handle review form
+        FormHandlers.handleAddReview('addReviewForm');
+    }
+};
+
+// Navigation Helper
+class Navigation {
+    static setActiveNavLink() {
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const navLinks = document.querySelectorAll('.nav-links a');
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            }
+        });
+    }
+}
+
+// Global initialization when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Set active navigation link
+    Navigation.setActiveNavLink();
+    
+    // Get current page name
+    const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'index';
+    
+    // Initialize based on current page
+    if (PageInit[currentPage]) {
+        PageInit[currentPage]();
+    }
+    
+    // Add hover effects to place cards
+    document.querySelectorAll('.place-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+    });
+});
+
+// Global functions (for onclick handlers in HTML)
+window.logout = function() {
+    AuthManager.logout();
+};
+
+window.showSignupMessage = function() {
+    alert('Sign up functionality would redirect to a registration page.');
+};
+
+window.showForgotPassword = function() {
+    alert('Password reset functionality would send a reset email.');
+};
+
+// Export for use in other scripts if needed
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        AuthManager,
+        PlaceManager,
+        ReviewManager,
+        Utils,
+        FormHandlers,
+        PageInit
+    };
+}
