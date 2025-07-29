@@ -8,18 +8,27 @@
 </head>
 <body>
     <main>
-        <!-- Add something to idfentify the place you're reviewing -->
+        <header>
+            <img src="logo.png" alt="Logo" class="logo">
+            <nav>
+                
+                <a href="login.html" id="login-link" class="login-button">Login</a>
+            </nav>
+        </header>
         <form id="review-form">
             <h2>Add a Review</h2>
-            <label for="review">Your Review:</label>
+            <label for="place">Place:</label>
+            <input type="text" id="place" name="place" readonly>
+            
+            <label for="review">Review:</label>
             <textarea id="review" name="review" required></textarea>
-            <label for="rating">Rating:</label>
-            <select id="rating" name="rating" required>
-                <!-- Options for rating -->
-            </select>
-            <button type="submit">Submit Review</button>
+            
+            <button type="submit">Submit</button>
         </form>
     </main>
+    <footer>
+        <p>© 2025 HBNB all rights reserved</p>
+    </footer>
     <script src="scripts.js"></script>
 </body>
 </html>

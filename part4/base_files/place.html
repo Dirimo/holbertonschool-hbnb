@@ -1,30 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place Details</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>Détails of the place. House with wiew of the sea</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="icon.png" />
 </head>
 <body>
-    <main>
-        <section id="place-details">
-            <!-- Place details will be populated dynamically -->
-        </section>
-        <section id="reviews">
-            <!-- Reviews will be populated dynamically -->
-        </section>
-        <section id="add-review">
-            <h2>Add a Review</h2>
-            <form id="review-form">
-                <label for="review-text">Review:</label>
-                <textarea id="review-text" name="review-text" required></textarea>
-                
-                <button type="submit">Submit</button>
-            </form>
-        </section>
-    </main>
-    <script src="scripts.js"></script>
-</body>
-</html>
+  <header>
+    <a href="index.html"><img src="images/logo.png" alt="Logo" class="logo" /></a>
+    <nav>
+      <a href="index.html">Welcome</a>
+      <a href="login.html">Login</a>
+    </nav>
+    <a href="login.html" class="login-button">Login</a>
+  </header>
 
+  <main>
+    <h1>Details of the place</h1>
+
+    <section class="place-details place-card">
+      <h2>House with wiew of the sea</h2>
+      <p><strong>Owner :</strong> Jean Dupont</p>
+      <p><strong>Price per night :</strong> 80 €</p>
+      <div class="place-info">
+        <h3>Description</h3>
+        <p>Charmant house with a view of the sea, for a quiet and relaxing stay with your family.</p>
+
+        <h3>Equipment</h3>
+        <ul class="amenities-list">
+          <li>Wi-Fi</li>
+          <li>Air conditioning</li>
+          <li>Free parking</li>
+          <li>Pool</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="reviews">
+      <h2>Reviews</h2>
+
+      <!-- Sample reviews -->
+      <div class="review-card">
+        <p>"Wonderful place to stay, great location!"</p>
+        <h3>Marie L.</h3>
+        <p>Note : ★★★★★</p>
+      </div>
+
+      <div class="review-card">
+        <p>"Calm and quiet, perfect for a family trip."</p>
+        <h3>Paul M.</h3>
+        <p>Note : ★★★★☆</p>
+      </div>
+
+      <!-- Only visible if user logged in -->
+      <a href="add_review.html" class="add-review-button">Add a review</a>
+
+      <!-- Alternatively, if user logged in, show the form here instead -->
+      <!--
+      <form action="/add_review" method="POST" class="add-review form">
+        <label for="comment">Commentaire</label>
+        <textarea id="comment" name="comment" required></textarea>
+
+        <label for="user">Nom d'utilisateur</label>
+        <input type="text" id="user" name="user" required />
+
+        <label for="rating">Note</label>
+        <select id="rating" name="rating" required>
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★☆</option>
+          <option value="3">★★★☆☆</option>
+          <option value="2">★★☆☆☆</option>
+          <option value="1">★☆☆☆☆</option>
+        </select>
+
+        <button type="submit">Envoyer</button>
+      </form>
+      -->
+
+    </section>
+  </main>
+
+  <footer>
+    © 2025 HBnB all rights reserved.
+  </footer>
+  </body>
+  </html>

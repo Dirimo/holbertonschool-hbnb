@@ -1,34 +1,127 @@
-
-/* 
-  This is a SAMPLE File to get you started. Follow the instructions on the project to complete the tasks. 
-  You'll probably need to override some of theese styles.
-*/
-
-* {
-    box-sizing: border-box;
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    background-color: #f4f4f4;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
     color: #333;
 }
 
+/* Header */
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #ffa500;
+    color: white;
 }
 
-nav a {
-    color: #fff;
+header .logo {
+    height: 40px;
+}
+
+header .login-button {
+    color: white;
     text-decoration: none;
-    margin-left: 1rem;
+    font-size: 16px;
 }
 
+header .logout-button {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+header .home-button {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+
+/* Main Content */
 main {
-    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
 }
 
+main h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+main label {
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 1em;
+}
+
+main select {
+    padding: 5px 10px;
+    font-size: 1em;
+}
+
+/* Place Cards */
+.place-item {
+    display: inline-block; 
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    vertical-align: top;  
+    
+}
+
+.place-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px 10px 0 0;
+}
+
+.place-card h2 {
+    font-size: 1.5em;
+    margin: 10px 0;
+}
+
+.place-card p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.details-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #ffa500;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.details-button:hover {
+    background-color: #e69500;
+}
+
+/* Footer */
+footer {
+    background-color: #ffa500;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+footer p {
+    margin: 0;
+}
