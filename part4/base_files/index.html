@@ -1,41 +1,47 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>List of Places</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type="image/png" href="images/icon.png" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBNB - Home</title>
+    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-   <header>
-    <nav>
-      <a href="index.html"><img src="images/logo.png" alt="Logo" class="logo" /></a>
-      <a href="login.html" id="login-link" class="login-button">Login</a>
-    </nav>
-   </header>
-  <main>
-    <h1>List of Places</h1>
-    <div class="places-container">
-      <div class="place-card">
-        <h2>House in the countryside</h2>
-        <p>Price per night: 80 €</p>
-        <a href="place.html?id=1" class="details-button">See details</a>
-      </div>
-      <div class="place-card">
-        <h2>Appartement in the center of the city</h2>
-        <p>Price per night: 100 €</p>
-        <a href="place.html?id=2" class="details-button">See details</a>
-      </div>
-      <div class="place-card">
-        <h2>Chalet in the mountains</h2>
-        <p>Price per night: 120 €</p>
-        <a href="place.html?id=3" class="details-button">See details</a>
-      </div>
-    </div>
-  </main>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">HBNB</a>
+            <a href="login.html" class="login-button guest-only">Login</a>
+            <button class="logout-button auth-only">Logout</button>
+        </div>
+    </header>
 
-  <footer>
-    © 2025 HBNB all rights reserved
-  </footer>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-content">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html" class="guest-only">Login</a></li>
+                <li><a href="add_review.html" class="auth-only">Add Review</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <h1 class="page-title">Available Places</h1>
+        
+        <div class="places-grid" id="placesGrid">
+            <!-- Places will be loaded here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 HBNB. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>

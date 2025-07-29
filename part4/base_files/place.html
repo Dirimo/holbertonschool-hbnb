@@ -1,85 +1,89 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Place Details</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type= "image/png" href="images/icon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBNB - Place Details</title>
+    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Header -->
     <header>
-      <nav>
-        <a href="index.html"><img src="images/logo.png" id="home-link" alt="Home" class="logo" /></a>
-        <a href="login.html" id="login-link" class="login-button">Login</a>
-      </nav>
+        <div class="header-content">
+            <a href="index.html" class="logo">HBNB</a>
+            <a href="login.html" class="login-button guest-only">Login</a>
+            <button class="logout-button auth-only">Logout</button>
+        </div>
     </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-content">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html" class="guest-only">Login</a></li>
+                <li><a href="add_review.html" class="auth-only">Add Review</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
     <main>
-      <section id="place-details" class="place-details">
-          <h1>Details of the place</h1>
-      <section class="place-details place-card">
-      <h2>House with wiew of the sea</h2>
-      <p><strong>Owner :</strong> Jean Dupont</p>
-      <p><strong>Price per night :</strong> 80 €</p>
-      <div class="place-info">
-        <h3>Description</h3>
-        <p>Charmant house with a view of the sea, for a quiet and relaxing stay with your family.</p>
+        <!-- Place Details -->
+        <div class="place-details" id="placeDetailsContent">
+            <!-- Place details will be loaded here by JavaScript -->
+        </div>
 
-        <h3>Equipment</h3>
-        <ul class="amenities-list">
-          <li>Wi-Fi</li>
-          <li>Air conditioning</li>
-          <li>Free parking</li>
-          <li>Pool</li>
-        </ul>
-      </div>
-    </section>
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <div class="reviews-header">
+                <h2 class="reviews-title">Guest Reviews</h2>
+                <a href="#" class="add-review-btn auth-only">Add Review</a>
+                <span class="guest-only" style="color: #666;">Login to add a review</span>
+            </div>
 
-    <section class="reviews">
-      <h2>Reviews</h2>
+            <div id="reviewsContainer">
+                <!-- Reviews will be loaded here by JavaScript -->
+            </div>
 
-      <!-- Sample reviews -->
-      <div class="review-card">
-        <p>"Wonderful place to stay, great location!"</p>
-        <h3>Marie L.</h3>
-        <p>Note : ★★★★★</p>
-      </div>
+            <!-- Inline Add Review Form (for authenticated users) -->
+            <div class="add-review auth-only" id="addReviewInline" style="display: none;">
+                <h3>Add Your Review</h3>
+                <form class="form" id="inlineReviewForm">
+                    <div class="form-group">
+                        <label for="inlineRating">Rating</label>
+                        <select id="inlineRating" name="rating" required>
+                            <option value="">Select a rating</option>
+                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ Very Good</option>
+                            <option value="3">⭐⭐⭐ Good</option>
+                            <option value="2">⭐⭐ Fair</option>
+                            <option value="1">⭐ Poor</option>
+                        </select>
+                    </div>
 
-      <div class="review-card">
-        <p>"Calm and quiet, perfect for a family trip."</p>
-        <h3>Paul M.</h3>
-        <p>Note : ★★★★☆</p>
-      </div>
+                    <div class="form-group">
+                        <label for="inlineComment">Your Review</label>
+                        <textarea 
+                            id="inlineComment" 
+                            name="comment" 
+                            required 
+                            placeholder="Share your experience at this place..."
+                        ></textarea>
+                    </div>
 
-      <!-- Only visible if user logged in -->
-      <a href="add_review.html" class="add-review-button">Add a review</a>
+                    <button type="submit">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </main>
 
-      <!-- Alternatively, if user logged in, show the form here instead -->
-      <!--
-      <form action="/add_review" method="POST" class="add-review form">
-        <label for="comment">Commentaire</label>
-        <textarea id="comment" name="comment" required></textarea>
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 HBNB. All rights reserved.</p>
+    </footer>
 
-        <label for="user">Nom d'utilisateur</label>
-        <input type="text" id="user" name="user" required />
-
-        <label for="rating">Note</label>
-        <select id="rating" name="rating" required>
-          <option value="5">★★★★★</option>
-          <option value="4">★★★★☆</option>
-          <option value="3">★★★☆☆</option>
-          <option value="2">★★☆☆☆</option>
-          <option value="1">★☆☆☆☆</option>
-        </select>
-
-        <button type="submit">Envoyer</button>
-      </form>
-      -->
-
-    </section>
-  </main>
-
-  <footer>
-    © 2025 HBnB all rights reserved.
-  </footer>
-  </body>
-  </html>
+    <script src="script.js"></script>
+</body>
+</html>

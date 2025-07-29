@@ -3,35 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Review</title>
+    <title>HBNB - Add Review</title>
+    <link rel="icon" href="icon.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/png" href="images/icon.png">
+
 </head>
-<body>    
-        <header>
-                <nav>
-                    <a href="index.html"><img src="images/logo.png" id="home-link" alt="Home" class="logo"></a>
-                    <a href="login.html" id="login-link" class="login-button">Login</a>
-                </nav>
-        </header>
-        <form id="review-form">
-            <h2>Add a Review</h2>
-            <label for="place_id">Your Review:</label>
-            <textarea id="review" name="review" required></textarea>
-            <label for="rating">Rating:</label>
-            <select id="rating" name="rating" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-            <button type="submit">Submit Review</button>
-        </form>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">HBNB</a>
+            <a href="login.html" class="login-button guest-only">Login</a>
+            <button class="logout-button auth-only">Logout</button>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-content">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html" class="guest-only">Login</a></li>
+                <li><a href="add_review.html" class="auth-only">Add Review</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Authentication Required Message -->
+        <div class="auth-required" id="authRequired" style="display: none;">
+            <h2>Authentication Required</h2>
+            <p>You need to be logged in to add a review. Please log in to continue.</p>
+            <a href="login.html" class="details-button">Login</a>
+        </div>
+
+        <!-- Review Form Content -->
+        <div id="reviewContent">
+            <h1 class="page-title">Add Your Review</h1>
+            <p class="page-subtitle">Share your experience and help other travelers make informed decisions</p>
+
+            <!-- Success Message -->
+            <div class="success-message" id="reviewSuccess">
+                <h3>Review Submitted Successfully!</h3>
+                <p>Thank you for sharing your experience. Your review will help other travelers.</p>
+            </div>
+
+            <!-- Place Selection -->
+            <div class="place-selection">
+                <h3>Select the place you stayed at:</h3>
+                <div class="places-grid">
+                    <div class="place-option" data-place-id="1">
+                        <div class="place-icon">🏖️</div>
+                        <div class="place-name">Beautiful Beach House</div>
+                        <div class="place-price">$150 per night</div>
+                    </div>
+                    <div class="place-option" data-place-id="2">
+                        <div class="place-icon">🏔️</div>
+                        <div class="place-name">Cozy Mountain Cabin</div>
+                        <div class="place-price">$100 per night</div>
+                    </div>
+                    <div class="place-option" data-place-id="3">
+                        <div class="place-icon">🏙️</div>
+                        <div class="place-name">Modern City Apartment</div>
+                        <div class="place-price">$200 per night</div>
+                    </div>
+                    <div class="place-option" data-place-id="4">
+                        <div class="place-icon">🌲</div>
+                        <div class="place-name">Forest Retreat</div>
+                        <div class="place-price">$120 per night</div>
+                    </div>
+                    <div class="place-option" data-place-id="5">
+                        <div class="place-icon">🏰</div>
+                        <div class="place-name">Historic Villa</div>
+                        <div class="place-price">$300 per night</div>
+                    </div>
+                    <div class="place-option" data-place-id="6">
+                        <div class="place-icon">🛥️</div>
+                        <div class="place-name">Lakeside Cottage</div>
+                        <div class="place-price">$180 per night</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Form -->
+            <div class="add-review">
+                <h3>Write Your Review</h3>
+                <form class="form" id="addReviewForm">
+                    <div class="form-group">
+                        <label for="reviewPlace">Place</label>
+                        <select id="reviewPlace" name="place" required>
+                            <option value="">Choose a place</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reviewRating">Rating</label>
+                        <select id="reviewRating" name="rating" required>
+                            <option value="">Select a rating</option>
+                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ Very Good</option>
+                            <option value="3">⭐⭐⭐ Good</option>
+                            <option value="2">⭐⭐ Fair</option>
+                            <option value="1">⭐ Poor</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reviewComment">Your Review</label>
+                        <textarea 
+                            id="reviewComment" 
+                            name="comment" 
+                            required 
+                            placeholder="Share your experience... What did you like about this place? What could be improved? Any tips for future guests?"
+                        ></textarea>
+                    </div>
+
+                    <button type="submit">Submit Review</button>
+                </form>
+            </div>
+        </div>
     </main>
+
+    <!-- Footer -->
     <footer>
-        <p>© 2025 HBNB all rights reserved</p>
+        <p>&copy; 2025 HBNB. All rights reserved.</p>
     </footer>
-    <script src="scripts.js"></script>
+
+    <script src="script.js"></script>
+    <script>
+        // Additional functionality for place selection
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle place option selection
+            document.querySelectorAll('.place-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.place-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Update the select dropdown
+                    const placeId = this.dataset.placeId;
+                    const select = document.getElementById('reviewPlace');
+                    if (select) {
+                        select.value = placeId;
+                    }
+                });
+            });
+
+            // Handle select dropdown change
+            const select = document.getElementById('reviewPlace');
+            if (select) {
+                select.addEventListener('change', function() {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.place-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to corresponding option
+                    if (this.value) {
+                        const option = document.querySelector(`[data-place-id="${this.value}"]`);
+                        if (option) {
+                            option.classList.add('selected');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

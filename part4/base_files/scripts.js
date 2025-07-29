@@ -1,207 +1,358 @@
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('login-form');
-    
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            
-            // Get form data
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            
-            // Basic validation
-            if (!email || !password) {
-                displayError('Please enter both email and password.');
-                return;
-            }
-            
-            // Show loading state
-            setLoadingState(true);
-            
-            try {
-                await loginUser(email, password);
-            } catch (error) {
-                console.error('Login error:', error);
-                displayError('An unexpected error occurred. Please try again.');
-            } finally {
-                setLoadingState(false);
-            }
+// Sample Data
+const places = {
+    1: {
+        title: "Beautiful Beach House",
+        price: "$150 per night",
+        icon: "🏖️",
+        host: "Sarah Johnson",
+        guests: "6 guests",
+        bedrooms: "3 bedrooms",
+        bathrooms: "2 bathrooms",
+        description: "Escape to this stunning beachfront house with panoramic ocean views. This spacious 3-bedroom, 2-bathroom home features modern amenities, a fully equipped kitchen, and direct beach access. Perfect for families or groups looking for a peaceful retreat by the sea. Wake up to the sound of waves and enjoy your morning coffee on the private deck overlooking the endless horizon.",
+        amenities: ["🌊 Beach Access", "🍳 Full Kitchen", "📶 Free WiFi", "🅿️ Free Parking", "🏊‍♂️ Pool", "🔥 Fireplace", "📺 Smart TV", "🧺 Washer & Dryer"]
+    },
+    2: {
+        title: "Cozy Mountain Cabin",
+        price: "$100 per night",
+        icon: "🏔️",
+        host: "John Mountain",
+        guests: "4 guests",
+        bedrooms: "2 bedrooms",
+        bathrooms: "1 bathroom",
+        description: "A rustic mountain cabin surrounded by pine trees and hiking trails. Features a cozy fireplace, fully equipped kitchen, and stunning mountain views. Perfect for outdoor enthusiasts and those seeking a peaceful mountain retreat away from the city noise.",
+        amenities: ["🔥 Fireplace", "🥾 Hiking Trails", "📶 Free WiFi", "🅿️ Free Parking", "🌲 Forest View", "🍳 Full Kitchen", "🛏️ Cozy Beds", "☕ Coffee Maker"]
+    },
+    3: {
+        title: "Modern City Apartment",
+        price: "$200 per night",
+        icon: "🏙️",
+        host: "Alex Urban",
+        guests: "4 guests",
+        bedrooms: "2 bedrooms",
+        bathrooms: "2 bathrooms",
+        description: "Stylish downtown apartment in the heart of the city. Walking distance to restaurants, shops, and attractions. Features modern amenities, high-speed internet, and city skyline views. Perfect for business travelers and urban explorers.",
+        amenities: ["🏢 City View", "🚇 Metro Access", "📶 High-Speed WiFi", "🎯 Central Location", "🍽️ Restaurants Nearby", "🛍️ Shopping", "💼 Business Center", "🚗 Uber/Taxi Access"]
+    },
+    4: {
+        title: "Forest Retreat",
+        price: "$120 per night",
+        icon: "🌲",
+        host: "Nature Lodge",
+        guests: "5 guests",
+        bedrooms: "2 bedrooms",
+        bathrooms: "1 bathroom",
+        description: "Peaceful forest retreat surrounded by nature. Perfect for digital detox and reconnecting with nature. Features rustic charm with modern comforts.",
+        amenities: ["🌲 Forest Setting", "🦌 Wildlife Viewing", "🔥 Fire Pit", "🥾 Hiking", "📚 Library", "🍳 Kitchen", "🛏️ Comfortable Beds", "🌟 Stargazing"]
+    },
+    5: {
+        title: "Historic Villa",
+        price: "$300 per night",
+        icon: "🏰",
+        host: "Heritage Properties",
+        guests: "8 guests",
+        bedrooms: "4 bedrooms",
+        bathrooms: "3 bathrooms",
+        description: "Magnificent historic villa with centuries of history. Luxurious accommodations with period furnishings and modern amenities.",
+        amenities: ["🏰 Historic Architecture", "🎨 Art Collection", "🍷 Wine Cellar", "🌹 Garden", "🛁 Luxury Bath", "🍽️ Dining Room", "📺 Entertainment", "🅿️ Private Parking"]
+    },
+    6: {
+        title: "Lakeside Cottage",
+        price: "$180 per night",
+        icon: "🛥️",
+        host: "Lake Properties",
+        guests: "6 guests",
+        bedrooms: "3 bedrooms",
+        bathrooms: "2 bathrooms",
+        description: "Charming lakeside cottage with private dock. Perfect for water activities and peaceful lakeside relaxation.",
+        amenities: ["🛥️ Private Dock", "🎣 Fishing", "🏊‍♂️ Swimming", "🛶 Kayaks", "🔥 Fire Pit", "🍳 Full Kitchen", "🌅 Lake View", "🌟 Peaceful Setting"]
+    }
+};
+
+const reviews = {
+    1: [
+        {
+            user: "Michael Chen",
+            rating: 5,
+            comment: "Amazing location right on the beach! The house was spotless and had everything we needed for our family vacation. The kids loved having direct beach access, and the adults enjoyed the peaceful atmosphere. Sarah was a wonderful host who responded quickly to all our questions. Highly recommend!",
+            date: "January 15, 2025"
+        },
+        {
+            user: "Emma Rodriguez",
+            rating: 5,
+            comment: "Perfect getaway spot! The house is beautifully decorated and very comfortable. The kitchen was well-equipped for cooking meals, and the deck was our favorite spot for morning coffee and evening sunsets. Will definitely be back!",
+            date: "January 10, 2025"
+        },
+        {
+            user: "David Thompson",
+            rating: 4,
+            comment: "Great place for a weekend retreat. The location is unbeatable and the house has all the amenities you need. Only minor issue was the WiFi was a bit slow, but that actually helped us disconnect and enjoy our time together. Overall, excellent experience.",
+            date: "January 5, 2025"
+        }
+    ],
+    2: [
+        {
+            user: "Lisa Park",
+            rating: 5,
+            comment: "Perfect mountain retreat! The cabin was cozy and had everything we needed. The fireplace was amazing for the cold nights, and the hiking trails right outside were fantastic. John was very helpful with local recommendations.",
+            date: "January 12, 2025"
+        },
+        {
+            user: "Mike Wilson",
+            rating: 4,
+            comment: "Great cabin for a mountain getaway. Loved the rustic feel and the views were spectacular. The kitchen was well-equipped and the beds were comfortable. Would definitely come back!",
+            date: "January 8, 2025"
+        }
+    ],
+    3: [
+        {
+            user: "Sarah Kim",
+            rating: 4,
+            comment: "Excellent location in the city center. The apartment was modern and clean with great amenities. Easy access to restaurants and attractions. Perfect for our business trip. Alex was very responsive to our needs.",
+            date: "January 18, 2025"
+        },
+        {
+            user: "Tom Garcia",
+            rating: 5,
+            comment: "Loved staying here! The city views were incredible and the location couldn't be better. Walking distance to everything we wanted to see. The apartment was stylish and comfortable. Highly recommend for city visits!",
+            date: "January 14, 2025"
+        }
+    ]
+};
+
+// Authentication Management
+class AuthManager {
+    static isLoggedIn() {
+        return localStorage.getItem('isLoggedIn') === 'true';
+    }
+
+    static login(email, password) {
+        // Simple validation (in real app, this would be server-side)
+        if (email && password) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userEmail', email);
+            this.updateAuthState();
+            return true;
+        }
+        return false;
+    }
+
+    static logout() {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userEmail');
+        this.updateAuthState();
+        window.location.href = 'index.html';
+    }
+
+    static updateAuthState() {
+        if (this.isLoggedIn()) {
+            document.body.classList.add('authenticated');
+        } else {
+            document.body.classList.remove('authenticated');
+        }
+    }
+
+    static getUserEmail() {
+        return localStorage.getItem('userEmail') || '';
+    }
+
+    static getUserName() {
+        const email = this.getUserEmail();
+        return email ? email.split('@')[0] : 'Guest';
+    }
+}
+
+// Place Management
+class PlaceManager {
+    static getPlace(id) {
+        return places[id] || null;
+    }
+
+    static getAllPlaces() {
+        return places;
+    }
+
+    static loadPlacesGrid(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = '';
+        
+        Object.entries(places).forEach(([id, place]) => {
+            const card = document.createElement('div');
+            card.className = 'place-card';
+            card.innerHTML = `
+                <div class="place-image">${place.icon}</div>
+                <div class="place-info">
+                    <h3>${place.title}</h3>
+                    <div class="place-price">${place.price}</div>
+                    <a href="place.html?id=${id}" class="details-button">View Details</a>
+                </div>
+            `;
+            container.appendChild(card);
         });
     }
-});
 
-/**
- * Sends login request to the API
- * @param {string} email - User's email
- * @param {string} password - User's password
- */
-async function loginUser(email, password) {
-    try {
-        const response = await fetch('https://your-api-url/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
+    static loadPlaceDetails(placeId, containerId) {
+        const place = this.getPlace(placeId);
+        const container = document.getElementById(containerId);
+        
+        if (!place || !container) return;
+
+        container.innerHTML = `
+            <div class="place-header">
+                <div>
+                    <h1 class="place-title">${place.title}</h1>
+                    <div class="place-price">${place.price}</div>
+                </div>
+            </div>
+
+            <div class="place-image">${place.icon}</div>
+
+            <div class="place-info">
+                <div class="place-description">
+                    <h3>About this place</h3>
+                    <p>${place.description}</p>
+                </div>
+
+                <div class="place-meta">
+                    <h3>Property Details</h3>
+                    <div class="meta-item">
+                        <span>Host:</span>
+                        <span>${place.host}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>Guests:</span>
+                        <span>${place.guests}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>Bedrooms:</span>
+                        <span>${place.bedrooms}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>Bathrooms:</span>
+                        <span>${place.bathrooms}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>Check-in:</span>
+                        <span>3:00 PM</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>Check-out:</span>
+                        <span>11:00 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="amenities-section">
+                <h3>Amenities</h3>
+                <ul class="amenities-list">
+                    ${place.amenities.map(amenity => `<li>${amenity}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+}
+
+// Review Management
+class ReviewManager {
+    static getReviews(placeId) {
+        return reviews[placeId] || [];
+    }
+
+    static addReview(placeId, rating, comment) {
+        if (!reviews[placeId]) {
+            reviews[placeId] = [];
+        }
+
+        const newReview = {
+            user: AuthManager.getUserName(),
+            rating: parseInt(rating),
+            comment: comment,
+            date: new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })
+        };
+
+        reviews[placeId].unshift(newReview);
+        return newReview;
+    }
+
+    static loadReviews(placeId, containerId) {
+        const placeReviews = this.getReviews(placeId);
+        const container = document.getElementById(containerId);
+        
+        if (!container) return;
+
+        if (placeReviews.length === 0) {
+            container.innerHTML = '<p>No reviews yet. Be the first to review this place!</p>';
+            return;
+        }
+
+        container.innerHTML = placeReviews.map(review => `
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="review-user">${review.user}</div>
+                    <div class="review-rating">${'⭐'.repeat(review.rating)}</div>
+                </div>
+                <div class="review-comment">${review.comment}</div>
+                <div class="review-date">${review.date}</div>
+            </div>
+        `).join('');
+    }
+}
+
+// Utility Functions
+class Utils {
+    static getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    static showMessage(elementId, message, type = 'success', duration = 3000) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        element.textContent = message;
+        element.className = `message ${type}`;
+        element.style.display = 'block';
+
+        setTimeout(() => {
+            element.style.display = 'none';
+        }, duration);
+    }
+
+    static hideMessage(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.style.display = 'none';
+        }
+    }
+
+    static populatePlaceSelect(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Choose a place</option>';
+        
+        Object.entries(places).forEach(([id, place]) => {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = `${place.icon} ${place.title}`;
+            select.appendChild(option);
         });
-        
-        if (response.ok) {
-            const data = await response.json();
-            
-            // Store JWT token in cookie
-            storeTokenInCookie(data.access_token);
-            
-            // Clear any existing error messages
-            clearError();
-            
-            // Redirect to main page
-            window.location.href = 'index.html';
-            
-        } else {
-            // Handle different error status codes
-            let errorMessage = 'Login failed. Please try again.';
-            
-            if (response.status === 401) {
-                errorMessage = 'Invalid email or password.';
-            } else if (response.status === 429) {
-                errorMessage = 'Too many login attempts. Please try again later.';
-            } else if (response.status >= 500) {
-                errorMessage = 'Server error. Please try again later.';
-            }
-            
-            // Try to get more specific error from response
-            try {
-                const errorData = await response.json();
-                if (errorData.message) {
-                    errorMessage = errorData.message;
-                }
-            } catch (parseError) {
-                // Use default error message if JSON parsing fails
-            }
-            
-            displayError(errorMessage);
-        }
-        
-    } catch (error) {
-        // Network or other fetch errors
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            displayError('Network error. Please check your connection and try again.');
-        } else {
-            displayError('An unexpected error occurred. Please try again.');
-        }
-        throw error; // Re-throw to be caught by the calling function
     }
 }
 
-/**
- * Stores JWT token in a secure cookie
- * @param {string} token - JWT token to store
- */
-function storeTokenInCookie(token) {
-    // Set cookie with security options
-    const cookieOptions = [
-        `token=${token}`,
-        'path=/',
-        'SameSite=Strict'
-        // Add 'Secure' flag if using HTTPS
-        // 'Secure'
-    ];
-    
-    // Optional: Set expiration (example: 7 days)
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 7);
-    cookieOptions.push(`expires=${expirationDate.toUTCString()}`);
-    
-    document.cookie = cookieOptions.join('; ');
-}
+// Form Handlers
+class FormHandlers {
+    static handleLogin(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return;
 
-/**
- * Displays error message to the user
- * @param {string} message - Error message to display
- */
-function displayError(message) {
-    // Remove any existing error messages
-    clearError();
-    
-    // Create error element
-    const errorDiv = document.createElement('div');
-    errorDiv.id = 'login-error';
-    errorDiv.className = 'error-message';
-    errorDiv.textContent = message;
-    errorDiv.style.cssText = `
-        color: #dc3545;
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        padding: 10px;
-        margin: 10px 0;
-        border-radius: 4px;
-        font-size: 14px;
-    `;
-    
-    // Insert error message at the top of the form
-    const loginForm = document.getElementById('login-form');
-    loginForm.insertBefore(errorDiv, loginForm.firstChild);
-    
-    // Auto-remove error after 5 seconds
-    setTimeout(clearError, 5000);
-}
-
-/**
- * Clears any existing error messages
- */
-function clearError() {
-    const existingError = document.getElementById('login-error');
-    if (existingError) {
-        existingError.remove();
-    }
-}
-
-/**
- * Sets loading state for the form
- * @param {boolean} isLoading - Whether the form is in loading state
- */
-function setLoadingState(isLoading) {
-    const submitButton = document.querySelector('#login-form button[type="submit"]');
-    const formInputs = document.querySelectorAll('#login-form input');
-    
-    if (submitButton) {
-        if (isLoading) {
-            submitButton.disabled = true;
-            submitButton.textContent = 'Logging in...';
-        } else {
-            submitButton.disabled = false;
-            submitButton.textContent = 'Login';
-        }
-    }
-    
-    // Disable/enable form inputs
-    formInputs.forEach(input => {
-        input.disabled = isLoading;
-    });
-}
-
-/**
- * Utility function to get token from cookie (for other parts of your app)
- * @returns {string|null} JWT token or null if not found
- */
-function getTokenFromCookie() {
-    const name = 'token=';
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const cookieArray = decodedCookie.split(';');
-    
-    for (let cookie of cookieArray) {
-        cookie = cookie.trim();
-        if (cookie.indexOf(name) === 0) {
-            return cookie.substring(name.length);
-        }
-    }
-    return null;
-}
-
-/**
- * Utility function to remove token cookie (for logout functionality)
- */
-function removeTokenCookie() {
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict';
-}
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
