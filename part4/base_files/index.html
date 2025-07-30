@@ -4,15 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HBNB - Home</title>
-    <link rel="icon" href="icon.png" type="image/png">
+    <!-- Corrigé: chemin vers le dossier images -->
+    <link rel="icon" href="images/logo.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Header -->
     <header>
         <div class="header-content">
-            <a href="index.html" class="logo">HBNB</a>
-            <a href="login.html" class="login-button guest-only">Login</a>
+            <!-- Modifié: ajout du logo image avec le texte -->
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="HBNB Logo" class="logo-img">
+                <span class="logo-text">HBNB</span>
+            </a>
+            
+            <!-- Ajout de l'ID pour le JavaScript d'authentification -->
+            <a href="login.html" class="login-button guest-only" id="login-link">Login</a>
             <button class="logout-button auth-only">Logout</button>
         </div>
     </header>
@@ -32,7 +39,16 @@
     <main>
         <h1 class="page-title">Available Places</h1>
         
-        <div class="places-grid" id="placesGrid">
+        <!-- Ajout du filtre de prix requis pour la fonctionnalité -->
+        <div class="filter-section">
+            <label for="price-filter">Filter by maximum price:</label>
+            <select id="price-filter">
+                <!-- Les options seront ajoutées par JavaScript -->
+            </select>
+        </div>
+        
+        <!-- Modifié: ID pour correspondre au JavaScript -->
+        <div class="places-grid" id="places-list">
             <!-- Places will be loaded here by JavaScript -->
         </div>
     </main>
@@ -42,6 +58,7 @@
         <p>&copy; 2025 HBNB. All rights reserved.</p>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- Modifié: nom du fichier pour correspondre à votre scripts.js -->
+    <script src="scripts.js"></script>
 </body>
 </html>
