@@ -1,4 +1,6 @@
-// Sample Data
+// Configuration for API
+const API_BASE_URL = 'http://localhost:5000/api/v1';
+// Sample Data containing place details and if API is not available
 const places = {
     1: {
         title: "Beautiful Beach House",
@@ -33,42 +35,8 @@ const places = {
         description: "Stylish downtown apartment in the heart of the city. Walking distance to restaurants, shops, and attractions. Features modern amenities, high-speed internet, and city skyline views. Perfect for business travelers and urban explorers.",
         amenities: ["🏢 City View", "🚇 Metro Access", "📶 High-Speed WiFi", "🎯 Central Location", "🍽️ Restaurants Nearby", "🛍️ Shopping", "💼 Business Center", "🚗 Uber/Taxi Access"]
     },
-    4: {
-        title: "Forest Retreat",
-        price: "$120 per night",
-        icon: "🌲",
-        host: "Nature Lodge",
-        guests: "5 guests",
-        bedrooms: "2 bedrooms",
-        bathrooms: "1 bathroom",
-        description: "Peaceful forest retreat surrounded by nature. Perfect for digital detox and reconnecting with nature. Features rustic charm with modern comforts.",
-        amenities: ["🌲 Forest Setting", "🦌 Wildlife Viewing", "🔥 Fire Pit", "🥾 Hiking", "📚 Library", "🍳 Kitchen", "🛏️ Comfortable Beds", "🌟 Stargazing"]
-    },
-    5: {
-        title: "Historic Villa",
-        price: "$300 per night",
-        icon: "🏰",
-        host: "Heritage Properties",
-        guests: "8 guests",
-        bedrooms: "4 bedrooms",
-        bathrooms: "3 bathrooms",
-        description: "Magnificent historic villa with centuries of history. Luxurious accommodations with period furnishings and modern amenities.",
-        amenities: ["🏰 Historic Architecture", "🎨 Art Collection", "🍷 Wine Cellar", "🌹 Garden", "🛁 Luxury Bath", "🍽️ Dining Room", "📺 Entertainment", "🅿️ Private Parking"]
-    },
-    6: {
-        title: "Lakeside Cottage",
-        price: "$180 per night",
-        icon: "🛥️",
-        host: "Lake Properties",
-        guests: "6 guests",
-        bedrooms: "3 bedrooms",
-        bathrooms: "2 bathrooms",
-        description: "Charming lakeside cottage with private dock. Perfect for water activities and peaceful lakeside relaxation.",
-        amenities: ["🛥️ Private Dock", "🎣 Fishing", "🏊‍♂️ Swimming", "🛶 Kayaks", "🔥 Fire Pit", "🍳 Full Kitchen", "🌅 Lake View", "🌟 Peaceful Setting"]
-    }
-};
-
-const reviews = {
+}    
+    const reviews = {
     1: [
         {
             user: "Michael Chen",
@@ -118,18 +86,35 @@ const reviews = {
         }
     ]
 };
-
+// Function to obtain a cookies by his name
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
 // Authentication Management
 class AuthManager {
     static isLoggedIn() {
+        const tokenFromCookie = getCookie('token');
+        if (tokenFromCookie) {
+            return true;
+        }
         return localStorage.getItem('isLoggedIn') === 'true';
     }
+
+    static getAuthToken() {
+        // Get token from cookie if available
+        return getCookie('token');
+        }
 
     static login(email, password) {
         // Simple validation (in real app, this would be server-side)
         if (email && password) {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('userEmail', email);
+            //Simulate token JWT of cookie
+            document.cookie = `token=jwt_your_token_value_${Date.now()}'; path=/; max-age=86400`;
             this.updateAuthState();
             return true;
         }
@@ -139,6 +124,8 @@ class AuthManager {
     static logout() {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('userEmail');
+        // Remove token from cookie
+        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
         this.updateAuthState();
         window.location.href = 'index.html';
     }
@@ -161,10 +148,39 @@ class AuthManager {
     }
 }
 
-// Place Management
+// Place Management with integration of API
 class PlaceManager {
-    static getPlace(id) {
-        return places[id] || null;
+    static async fetchPlaceFromAPI(placeId) {  
+        try {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            // Add the token authorization if is available
+            const authToken = AuthManager.getAuthToken();
+            if (authTokentoken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            const response = await fetch(`https://api.example.com/places/${placeId}`, {
+                method: 'GET',
+                headers,
+            });
+
+            if (!response.ok) {
+                throw new Error('Error HTTP/ ${response.status}');
+            }
+
+            const placeData = await response.json();
+            return placeData;
+        } catch (error) {
+            console.error('Error fetching place from API:', error);
+            return this.getPlace(placeId);
+        }
+    }
+
+    static getPlace(Id) {
+        return places[Id] || null;
     }
 
     static getAllPlaces() {
@@ -195,42 +211,98 @@ class PlaceManager {
     static loadPlaceDetails(placeId, containerId) {
         const place = this.getPlace(placeId);
         const container = document.getElementById(containerId);
-        
-        if (!place || !container) return;
+        if (!container) return;
 
+        container.innerHTML = '';
+
+        Object.entries(places).forEach(([id, place]) => {
+            const card = document.createElement('div');
+            card.className = 'place-card';
+            card.innerHTML = `
+                <div class="place-image">${place.icon}</div>
+                <div class="place-info">
+                    <h3>${place.title}</h3>
+                    <div class="place-price">${place.price}</div>
+                    <a href="place.html?id=${id}" class="details-button">View Details</a>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Fonction modifiée pour charger les détails du lieu avec API
+    static async loadPlaceDetailsFromAPI(placeId, containerId) {
+        const container = document.getElementById(containerId);
+        
+        if (!container) {
+            console.error(`Container avec l'ID '${containerId}' non trouvé`);
+            return;
+        }
+
+        // Afficher un loader pendant le chargement
+        container.innerHTML = `
+            <div class="loading-message">
+                <h2>Chargement des détails du lieu...</h2>
+            </div>
+        `;
+
+        try {
+            // Récupérer les détails depuis l'API
+            const place = await this.fetchPlaceFromAPI(placeId);
+            
+            if (!place) {
+                throw new Error('Lieu non trouvé');
+            }
+
+            // Populer les détails du lieu
+            this.populatePlaceDetails(place, container);
+
+        } catch (error) {
+            console.error('Erreur lors du chargement des détails:', error);
+            container.innerHTML = `
+                <div class="error-message">
+                    <h2>Erreur</h2>
+                    <p>Impossible de charger les détails du lieu. Veuillez réessayer plus tard.</p>
+                </div>
+            `;
+        }
+    }
+
+    // Fonction pour populer les détails du lieu dans le conteneur
+    static populatePlaceDetails(place, container) {
         container.innerHTML = `
             <div class="place-header">
                 <div>
-                    <h1 class="place-title">${place.title}</h1>
-                    <div class="place-price">${place.price}</div>
+                    <h1 class="place-title">${place.title || place.name}</h1>
+                    <div class="place-price">${place.price ? place.price : (place.price_per_night ? `$${place.price_per_night} per night` : 'Prix non disponible')}</div>
                 </div>
             </div>
 
-            <div class="place-image">${place.icon}</div>
+            <div class="place-image">${place.icon || '🏠'}</div>
 
             <div class="place-info">
                 <div class="place-description">
                     <h3>About this place</h3>
-                    <p>${place.description}</p>
+                    <p>${place.description || 'Aucune description disponible'}</p>
                 </div>
 
                 <div class="place-meta">
                     <h3>Property Details</h3>
                     <div class="meta-item">
                         <span>Host:</span>
-                        <span>${place.host}</span>
+                        <span>${place.host || place.host_name || 'Non spécifié'}</span>
                     </div>
                     <div class="meta-item">
                         <span>Guests:</span>
-                        <span>${place.guests}</span>
+                        <span>${place.guests || place.max_guests || 'Non spécifié'}</span>
                     </div>
                     <div class="meta-item">
                         <span>Bedrooms:</span>
-                        <span>${place.bedrooms}</span>
+                        <span>${place.bedrooms || place.number_of_rooms || 'Non spécifié'}</span>
                     </div>
                     <div class="meta-item">
                         <span>Bathrooms:</span>
-                        <span>${place.bathrooms}</span>
+                        <span>${place.bathrooms || place.number_of_bathrooms || 'Non spécifié'}</span>
                     </div>
                     <div class="meta-item">
                         <span>Check-in:</span>
@@ -245,16 +317,95 @@ class PlaceManager {
 
             <div class="amenities-section">
                 <h3>Amenities</h3>
-                <ul class="amenities-list">
-                    ${place.amenities.map(amenity => `<li>${amenity}</li>`).join('')}
-                </ul>
+                ${this.createAmenitiesHTML(place.amenities)}
             </div>
         `;
     }
-}
 
+    // Fonction pour créer l'HTML des équipements
+    static createAmenitiesHTML(amenities) {
+        if (!amenities || amenities.length === 0) {
+            return '<p>Aucun équipement spécifié</p>';
+        }
+
+        const amenitiesList = amenities.map(amenity => `<li>${amenity}</li>`).join('');
+        return `<ul class="amenities-list">${amenitiesList}</ul>`;
+    }
+
+    // Fonction de compatibilité pour les anciennes pages
+    static loadPlaceDetails(placeId, containerId) {
+        const place = this.getPlace(placeId);
+        const container = document.getElementById(containerId);
+        
+        if (!place || !container) return;
+
+        this.populatePlaceDetails(place, container);
+    }
+}
 // Review Management
 class ReviewManager {
+    // Fonction pour récupérer les avis depuis l'API
+    static async fetchReviewsFromAPI(placeId) {
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            const authToken = AuthManager.getAuthToken();
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/places/${placeId}/reviews`, {
+                method: 'GET',
+                headers: headers
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const reviewsData = await response.json();
+            return reviewsData;
+        } catch (error) {
+            console.error('Erreur lors de la récupération des avis depuis l\'API:', error);
+            // Fallback vers les données locales
+            return this.getReviews(placeId);
+        }
+    }
+
+    // Fonction pour soumettre un avis via l'API
+    static async submitReviewToAPI(placeId, rating, comment) {
+        try {
+            const authToken = AuthManager.getAuthToken();
+            if (!authToken) {
+                throw new Error('Authentification requise pour ajouter un avis');
+            }
+
+            const response = await fetch(`${API_BASE_URL}/places/${placeId}/reviews`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    rating: parseInt(rating),
+                    comment: comment
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('Erreur lors de la soumission de l\'avis:', error);
+            throw error;
+        }
+    }
+
     static getReviews(placeId) {
         return reviews[placeId] || [];
     }
@@ -279,12 +430,24 @@ class ReviewManager {
         return newReview;
     }
 
-    static loadReviews(placeId, containerId) {
-        const placeReviews = this.getReviews(placeId);
+    // Fonction modifiée pour charger les avis avec API
+    static async loadReviewsFromAPI(placeId, containerId) {
         const container = document.getElementById(containerId);
-        
         if (!container) return;
 
+        try {
+            const placeReviews = await this.fetchReviewsFromAPI(placeId);
+            this.renderReviews(placeReviews, container);
+        } catch (error) {
+            console.error('Erreur lors du chargement des avis:', error);
+            // Fallback vers les données locales
+            const placeReviews = this.getReviews(placeId);
+            this.renderReviews(placeReviews, container);
+        }
+    }
+
+    // Fonction pour afficher les avis
+    static renderReviews(placeReviews, container) {
         if (placeReviews.length === 0) {
             container.innerHTML = '<p>No reviews yet. Be the first to review this place!</p>';
             return;
@@ -293,13 +456,22 @@ class ReviewManager {
         container.innerHTML = placeReviews.map(review => `
             <div class="review-card">
                 <div class="review-header">
-                    <div class="review-user">${review.user}</div>
+                    <div class="review-user">${review.user || review.user_name}</div>
                     <div class="review-rating">${'⭐'.repeat(review.rating)}</div>
                 </div>
                 <div class="review-comment">${review.comment}</div>
-                <div class="review-date">${review.date}</div>
+                <div class="review-date">${review.date || new Date(review.created_at).toLocaleDateString()}</div>
             </div>
         `).join('');
+    }
+
+    static loadReviews(placeId, containerId) {
+        const placeReviews = this.getReviews(placeId);
+        const container = document.getElementById(containerId);
+        
+        if (!container) return;
+
+        this.renderReviews(placeReviews, container);
     }
 }
 
@@ -371,11 +543,12 @@ class FormHandlers {
         });
     }
 
+    // Fonction modifiée pour gérer l'ajout d'avis avec API
     static handleAddReview(formId, placeId = null) {
         const form = document.getElementById(formId);
         if (!form) return;
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             if (!AuthManager.isLoggedIn()) {
@@ -384,34 +557,58 @@ class FormHandlers {
             }
 
             const selectedPlaceId = placeId || document.getElementById('reviewPlace')?.value;
-            const rating = document.getElementById(formId.includes('inline') ? 'inlineRating' : 'reviewRating').value;
-            const comment = document.getElementById(formId.includes('inline') ? 'inlineComment' : 'reviewComment').value;
+            const ratingField = formId.includes('inline') ? 'inlineRating' : 'reviewRating';
+            const commentField = formId.includes('inline') ? 'inlineComment' : 'reviewComment';
+            const rating = document.getElementById(ratingField).value;
+            const comment = document.getElementById(commentField).value;
             
             if (!selectedPlaceId || !rating || !comment) {
                 alert('Please fill in all fields.');
                 return;
             }
 
-            // Add the review
-            ReviewManager.addReview(selectedPlaceId, rating, comment);
-            
-            // Show success message
-            if (formId.includes('inline')) {
-                alert('Review added successfully!');
-                // Reload reviews if we're on place details page
-                ReviewManager.loadReviews(selectedPlaceId, 'reviewsContainer');
-                // Hide the form
-                const inlineForm = document.getElementById('addReviewInline');
-                if (inlineForm) inlineForm.style.display = 'none';
-            } else {
-                Utils.showMessage('reviewSuccess', 'Review added successfully!', 'success');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
+            try {
+                // Essayer de soumettre via l'API d'abord
+                await ReviewManager.submitReviewToAPI(selectedPlaceId, rating, comment);
+                
+                // Si succès, afficher le message et recharger les avis
+                if (formId.includes('inline')) {
+                    alert('Review added successfully!');
+                    // Recharger les avis depuis l'API
+                    await ReviewManager.loadReviewsFromAPI(selectedPlaceId, 'reviewsContainer');
+                    // Masquer le formulaire
+                    const inlineForm = document.getElementById('addReviewInline');
+                    if (inlineForm) inlineForm.style.display = 'none';
+                } else {
+                    Utils.showMessage('reviewSuccess', 'Review added successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+                
+                // Réinitialiser le formulaire
+                form.reset();
+                
+            } catch (error) {
+                console.error('Erreur API, fallback vers les données locales:', error);
+                
+                // Fallback vers l'ancienne méthode
+                ReviewManager.addReview(selectedPlaceId, rating, comment);
+                
+                if (formId.includes('inline')) {
+                    alert('Review added successfully!');
+                    ReviewManager.loadReviews(selectedPlaceId, 'reviewsContainer');
+                    const inlineForm = document.getElementById('addReviewInline');
+                    if (inlineForm) inlineForm.style.display = 'none';
+                } else {
+                    Utils.showMessage('reviewSuccess', 'Review added successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+                
+                form.reset();
             }
-            
-            // Reset form
-            form.reset();
         });
     }
 
@@ -447,27 +644,32 @@ const PageInit = {
         FormHandlers.handleLogin('loginForm');
     },
 
-    // Initialize Place Details Page
+    // Initialize Place Details Page (MODIFIÉ POUR LA TÂCHE 3)
     place: function() {
         AuthManager.updateAuthState();
         FormHandlers.handleLogout();
         
         const placeId = Utils.getUrlParameter('id') || '1';
         
-        // Load place details
-        PlaceManager.loadPlaceDetails(placeId, 'placeDetailsContent');
+        // Charger les détails du lieu depuis l'API
+        PlaceManager.loadPlaceDetailsFromAPI(placeId, 'placeDetailsContent');
         
-        // Load reviews
-        ReviewManager.loadReviews(placeId, 'reviewsContainer');
+        // Charger les avis depuis l'API
+        ReviewManager.loadReviewsFromAPI(placeId, 'reviewsContainer');
         
-        // Handle inline review form
+        // Gérer le formulaire d'avis inline
         FormHandlers.handleAddReview('inlineReviewForm', placeId);
         
-        // Handle "Add Review" button click
+        // Gérer le bouton "Add Review"
         const addReviewBtn = document.querySelector('.add-review-btn');
         if (addReviewBtn) {
             addReviewBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                if (!AuthManager.isLoggedIn()) {
+                    alert('Please login to add a review.');
+                    window.location.href = 'login.html';
+                    return;
+                }
                 const inlineForm = document.getElementById('addReviewInline');
                 if (inlineForm) {
                     inlineForm.style.display = inlineForm.style.display === 'none' ? 'block' : 'none';
