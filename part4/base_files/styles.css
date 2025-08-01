@@ -613,8 +613,8 @@ body.authenticated .guest-only {
 }
 
 .logo-img {
-    width: 32px;
-    height: 32px;
+    width: 2000x;
+    height: auto;
     object-fit: contain;
 }
 

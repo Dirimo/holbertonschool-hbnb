@@ -106,7 +106,18 @@ class AuthManager {
     static getAuthToken() {
         // Get token from cookie if available
         return getCookie('token');
+    }
+
+    // Function to verify authentication and redirect if needed
+    static checkAuthenticationAndRedirect() {
+        const token = this.getAuthToken();
+        if (!token || !this.isLoggedIn()) {
+            console.log('User is not authenticated. Redirecting to login page.');
+            window.location.href = 'index.html';
+            return false;
         }
+        return true;
+    }    
 
     static login(email, password) {
         // Simple validation (in real app, this would be server-side)
@@ -162,7 +173,7 @@ class PlaceManager {
                 headers['Authorization'] = `Bearer ${authToken}`;
             }
 
-            const response = await fetch(`https://api.example.com/places/${placeId}`, {
+            const response = await fetch(`${API_BASE_URL}/places/${placeId}`, {
                 method: 'GET',
                 headers,
             });
@@ -174,11 +185,44 @@ class PlaceManager {
             const placeData = await response.json();
             return placeData;
         } catch (error) {
-            console.error('Error fetching place from API:', error);
+            console.error('Error for the request of details about the place from API:', error);
             return this.getPlace(placeId);
         }
     }
+    // Funciton to get all places by review
+    static async fetchPlacesFromAPI() {
+        try {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            // Add the token authorization if is available
+            const authToken = AuthManager.getAuthToken();
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
 
+            const response = await fetch(`${API_BASE_URL}/places`, {
+                method: 'GET',
+                headers,
+            });
+
+            if (!response.ok) {
+                throw new Error('Error HTTP/ ${response.status}');
+            }
+
+            const placesData = await response.json();
+            return placesData;
+        } catch (error) {
+            console.error('Error for the request of places from API:', error);
+            // Fallback to local data
+            return Object.entries(places).map(([id, place]) => ({
+                id: id,
+                ...place
+            }))
+        }
+    }
+    
     static getPlace(Id) {
         return places[Id] || null;
     }
@@ -230,35 +274,35 @@ class PlaceManager {
         });
     }
 
-    // Fonction modifiée pour charger les détails du lieu avec API
+    // Function to load place details from API
     static async loadPlaceDetailsFromAPI(placeId, containerId) {
         const container = document.getElementById(containerId);
         
         if (!container) {
-            console.error(`Container avec l'ID '${containerId}' non trouvé`);
+            console.error(`Container with ID '${containerId}' not found.`);
             return;
         }
 
-        // Afficher un loader pendant le chargement
+        // Show the loading message during the loading
         container.innerHTML = `
             <div class="loading-message">
-                <h2>Chargement des détails du lieu...</h2>
+                <h2>Charging details of the place...</h2>
             </div>
         `;
 
         try {
-            // Récupérer les détails depuis l'API
+            // Recover details from API
             const place = await this.fetchPlaceFromAPI(placeId);
             
             if (!place) {
-                throw new Error('Lieu non trouvé');
+                throw new Error('Place not found');
             }
 
-            // Populer les détails du lieu
+            // Populate the place details
             this.populatePlaceDetails(place, container);
 
         } catch (error) {
-            console.error('Erreur lors du chargement des détails:', error);
+            console.error('Error while loading place details:', error);
             container.innerHTML = `
                 <div class="error-message">
                     <h2>Erreur</h2>
@@ -268,7 +312,7 @@ class PlaceManager {
         }
     }
 
-    // Fonction pour populer les détails du lieu dans le conteneur
+    // Fonction for populate the place details in the container
     static populatePlaceDetails(place, container) {
         container.innerHTML = `
             <div class="place-header">
@@ -322,7 +366,7 @@ class PlaceManager {
         `;
     }
 
-    // Fonction pour créer l'HTML des équipements
+    // Function to create the amenities HTML
     static createAmenitiesHTML(amenities) {
         if (!amenities || amenities.length === 0) {
             return '<p>Aucun équipement spécifié</p>';
@@ -332,7 +376,7 @@ class PlaceManager {
         return `<ul class="amenities-list">${amenitiesList}</ul>`;
     }
 
-    // Fonction de compatibilité pour les anciennes pages
+    // Function of comparison for the old page
     static loadPlaceDetails(placeId, containerId) {
         const place = this.getPlace(placeId);
         const container = document.getElementById(containerId);
@@ -342,9 +386,53 @@ class PlaceManager {
         this.populatePlaceDetails(place, container);
     }
 }
-// Review Management
+// Review Management with integration of API
 class ReviewManager {
-    // Fonction pour récupérer les avis depuis l'API
+// Principal function to fetch reviews from the API
+// (Removed duplicate/erroneous submitReview method)
+
+// Function to fetch reviews from the API
+static async handleResponse(response, formId) {
+    const form = document.getElementById(formId);
+    const successMessage = document.getElementById('reviewMessage');
+
+    if(response.ok) {
+        console.log('Answer submitted successfully');
+
+        //Show the success message
+        successMessage.style.display = 'block';
+        successMessage.scrollIntoView({ behavior: 'smooth' });
+        //Reset the form
+        if  (form){
+            form.reset();
+
+            //Rinitialise the selection of visual review 
+            document.querySelectorAll('.place-option').forEach(option=> {
+                option.classList.remove('selected');
+            });
+        }
+
+        // To mask the lessage of succes after 5 seconds
+        setTimeout(() => {
+            if (successMessage) {
+                successMessage.style.display = 'none';
+            }
+        }, 5000);
+
+    } else {
+        console.error('Error while submitting review:')
+    
+        //Try to recover the error message of API
+        try {
+            const errorData = await response.json();
+            const errorMessage = errorData.message || 'Error while submitting review';
+            alert('Error: ${errorMessage}');
+        } catch (e) {
+            alert('Error while submitting review');
+        }
+    }
+} 
+    // Function to recover reviews from the API
     static async fetchReviewsFromAPI(placeId) {
         try {
             const headers = {
@@ -369,12 +457,12 @@ class ReviewManager {
             return reviewsData;
         } catch (error) {
             console.error('Erreur lors de la récupération des avis depuis l\'API:', error);
-            // Fallback vers les données locales
+            // Fallback for local data
             return this.getReviews(placeId);
         }
     }
 
-    // Fonction pour soumettre un avis via l'API
+    // Function to submit a review to the API
     static async submitReviewToAPI(placeId, rating, comment) {
         try {
             const authToken = AuthManager.getAuthToken();
@@ -506,16 +594,36 @@ class Utils {
         const select = document.getElementById(selectId);
         if (!select) return;
 
+        // Recover places from API
+        const placesData = PlaceManager.fetchAllPlacesFromAPI();
+        
         select.innerHTML = '<option value="">Choose a place</option>';
         
-        Object.entries(places).forEach(([id, place]) => {
+        placesData.forEach(place => {
             const option = document.createElement('option');
             option.value = id;
-            option.textContent = `${place.icon} ${place.title}`;
+            option.textContent = `${place.icon} || '🏠'} ${place.title || place.name}`;
             select.appendChild(option);
         });
     }
 }
+
+// Preselection if ID place in URL
+     const placeIdFromUrl = Utils.getPlaceIdFromUrl();
+    if (placeIdFromUrl) {
+        select.value = placeIdFromUrl;
+                
+        // Aussi sélectionner visuellement l'option correspondante
+         const visualOption = document.querySelector(`[data-place-id="${placeIdFromUrl}"]`);
+        if (visualOption) {
+            document.querySelectorAll('.place-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            visualOption.classList.add('selected');
+        }
+    }
+
+// (Removed duplicate static populatePlaceSelect method)
 
 // Form Handlers
 class FormHandlers {
