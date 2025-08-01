@@ -1,3 +1,4 @@
+from app.models.association import place_amenities
 from app import db
 from app.models.base_model import BaseModel
 
